@@ -73,7 +73,7 @@ NOTE: the Arduino libraries are easy to use but they are slow and
       for some examples.
 */
 
-//--------------- HEADER FILES------------------------------------------------
+///--------------- HEADER FILES------------------------------------------------
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
@@ -87,25 +87,24 @@ NOTE: the Arduino libraries are easy to use but they are slow and
 //volatile uint16_t counter ; // view this with the command "ousb symr -u08 counter"
 // volatile is needed to ensure the variable is visible
 // to any debugger.
-volatile uint8_t iOverCnt; // Counter to see if user code too long and causes
-                           //  interrupt overrun.
-volatile uint16_t iBusy;   // Flag is user level interrupt code busy.
+volatile uint8_t iOverCnt; /// Counter to see if user code too long and causes interrupt overrun.
+volatile uint16_t iBusy;   //! Flag is user level interrupt code busy.
 
-volatile uint8_t duty = 0; //duty cycle variable
-volatile uint8_t flag = 0; // when switch 1 on ousb board is on, flag is set to 1
-uint16_t ct_int = 0;       // counter for jitter pattern array with 200 elements
-volatile uint16_t counter; // motor finished 1/2 round, how many 200us interrupte has done  --> we can determine speed of motor
+volatile uint8_t duty = 0; //!duty cycle variable
+volatile uint8_t flag = 0; //! when switch 1 on ousb board is on, flag is set to 1
+uint16_t ct_int = 0;       //! counter for jitter pattern array with 200 elements
+volatile uint16_t counter; //! motor finished 1/2 round, how many 200us interrupte has done  --> we can determine speed of motor
 uint16_t counter3 = 0;
 uint8_t bit = 0;
 
-int prev = 0, cur = 0; // used to determine rising and falling edge
+int prev = 0, cur = 0; //! used to determine rising and falling edge
 
-uint8_t T_sampling = 10;         //10ms
-volatile uint8_t pre_speed = 50; // preset the target of motor speed, metric: rounds/second.
+uint8_t T_sampling = 10;         /// Constant Sample time 10ms
+volatile uint8_t pre_speed = 50; //! preset the target of motor speed, metric: rounds/second.
 volatile uint8_t en_jit = 1;
 //volatile uint8_t  step[250];
 
-//variable for digital controller
+//!variable for digital controller
 volatile float x0 = 0, x1 = 0, y = 0, y2 = 0;
 volatile float dC[200];
 volatile float gain = 0.2272;
@@ -181,6 +180,10 @@ volatile uint8_t j = 0;
     }
 }
 */
+
+/**
+ * @brief PID parameter * 
+ */
 float Kd = 0;
 float Ki = 1;
 //float Ki = 2.7;
@@ -192,6 +195,11 @@ volatile float a;
 volatile float b;
 volatile float c;
 
+/**
+ * @brief PI control function
+ * 
+ * @param sp : input speed of motor
+ */
 void PI_Control(uint16_t sp)
 {
         e2 = e1;
@@ -224,6 +232,11 @@ void PI_Control(uint16_t sp)
                 //              counter4++;
         }
 }
+
+/**
+ * @brief 200us interrrupt timer tick function 
+ * 
+ */
 void user_system_200us_interrupt()
 { //--- check for overrun.
         //  PORTB ^= 0x80 ;  // change PB7 every time called.
@@ -319,6 +332,10 @@ void user_command(uint8_t *get_ctrl, uint16_t *get_addr, uint16_t *val)
 {
 }
 
+/**
+ * @brief loop funtion
+ * 
+ */
 void user_forever_loop()
 { //--- Variables & initializations.duty
 
@@ -326,14 +343,14 @@ void user_forever_loop()
         //pinMode(1,OUTPUT); // PB0 set to output
         //digitalWrite(1, LOW) ;  //Set default PB0 low to disable
 
-        // caculation in PID controller
+        //! caculation in PID controller
         a = Kp + Ki * T_sampling / 2.0 / 1000 + Kd * 1000.0 / T_sampling;
         b = -Kp + Ki * T_sampling / 2.0 / 1000 - 2 * Kd * 1000.0 / T_sampling;
         c = Kd / T_sampling * 1000.0;
 
-        pwmFreq(4, 2000);     //PB3 or PWM1 set pwmFreq == 2000
-        pwmDuty(4, 50);       // set duty cycle = 0 to disable motor
-        PORTB = PORTB | 0X80; //for debug purpose
+        pwmFreq(4, 2000);     //!PB3 or PWM1 set pwmFreq == 2000
+        pwmDuty(4, 50);       //! set duty cycle = 0 to disable motor
+        PORTB = PORTB | 0X80; //!for debug purpose
         counter = 65000;
         //pwmDuty(4,0);
         //Check pinC timer
@@ -342,10 +359,9 @@ void user_forever_loop()
                 digitalWrite(2, digitalRead(23));
                 digitalWrite(3, digitalRead(24));
                 PORTB = PORTB | 0X40; //for debug purpose
-                if (PINC & 0x01)      //switch PC0 is START Button
+                if (PINC & 0x01)      ///switch PC0 is START Button
                 {
-                        pwmDuty(4, duty); //set
-                                          //pwmDuty(4,90);
+                        pwmDuty(4, duty); ///set initial duty cycle for control signal;
                         flag = 1;
                 }
                 else
