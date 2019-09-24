@@ -1,0 +1,13 @@
+20090210 : got user code fully working including interrupts.
+
+20090208 : tried adding delays to main loop after usbPoll().
+           used "stepper_motor_demo +100" as timing reference.
+              0 ms : demo took 4 secs.
+              1 ms : demo took 4.5 secs.
+              2 ms : 7 secs
+              3 ms : very slow, died after  7 secs.
+              4 ms : very slow, died after 10 secs.
+              5 ms : very slow, died after 10 secs.
+             10 ms : very slow, died after 10 secs.
+           Conclude user code should delay less than 1ms, but blowing
+           out to longer times on an intermittent basis is OK.
